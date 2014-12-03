@@ -3,6 +3,7 @@ import processing.data.*;
 import processing.event.*; 
 import processing.opengl.*; 
 
+import processing.net.*; 
 import SimpleOpenNI.*; 
 
 import java.util.HashMap; 
@@ -17,9 +18,10 @@ import java.io.IOException;
 public class Kinect extends PApplet {
 
 
-//Client client;
+
 
 SimpleOpenNI kinect;
+Client client;
 int[] userMapArr;
 float tolerence = 0.6f;
 int i = 0;
@@ -28,7 +30,7 @@ public void setup(){
 	frameRate(15);
 	size(640,480);
 
-	//client = new Client(this,"172.30.40.35",3000);
+	client = new Client(this,"172.30.40.34",3000);
 	kinect = new SimpleOpenNI(this);
 	kinect.enableDepth();
 	kinect.enableUser();
@@ -68,8 +70,6 @@ public void drawSkelet(int userId){
 
 	line(projLeftHandPos.x, projLeftHandPos.y, projRightHandPos.x, projRightHandPos.y);
 
-	//midX=startX+((endX-startX)/2.0);
-	//midY=startY+((endY-startY)/2.0);
 	float midX=projLeftHandPos.x+((projRightHandPos.x-projLeftHandPos.x)/2.0f);
 	float midY=projLeftHandPos.y+((projRightHandPos.y-projLeftHandPos.y)/2.0f);
 
@@ -78,37 +78,40 @@ public void drawSkelet(int userId){
 	line(midX - 640,midY,midX+640,midY);
 	ellipse(640, midY, 20, 20);
 
-	//client.write(projLeftHandPos.x+"/");
+	float a = calculateDistance(640, midY, projLeftHandPos.x, projLeftHandPos.y);
+	float b = calculateDistance(midX, midY, projLeftHandPos.x, projLeftHandPos.y);
+	float c = calculateDistance(midX, midY, 640, midY);
 
-	// cos^-1(-a^2 + b^2+c^2 / 2b);
-	float a = dist(leftHandPos.x, leftHandPos.y, 640, midY);
-	float b = dist(midX, midY, leftHandPos.x,leftHandPos.y);
-	float c = dist(midX, midY, 640,midY);
+	float iA = a * a;
+	float iB = b * b;
+	float iC = c * c;
 
-	//println("a: "+a);
-	//println("b: "+b);
-	//println("c: "+c);
+	float teller = iB + iC - iA;
+	float noemer = 2 * b * c;
 
-	float iA = pow(a, 2);
-	float iB = pow(b, 2);
-	float iC = pow(c, 2);
+	float cosA = teller / noemer;
+	float degree = degrees(acos(cosA));
 
-	float cos = (-iA + iB + iC) / (2 * b * c);
+	if (projLeftHandPos.y < midY) {
+		degree = -degree;
+	}
 
-	float angle = acos(cos);
-
-	float graden = (angle * 180)/(PI);
-
-	if(i%100 == 0){
-		println("Rad: "+ cos);
+	if(i%10 == 0){
 		i = 0;
+		client.write(degree+"/");
 	}
 	i++;
-	//println("Rad: "+ cos);
 }
 
 public void onNewUser(SimpleOpenNI kinect, int userId){
 	kinect.startTrackingSkeleton(userId);
+}
+
+public float calculateDistance (float x1, float y1, float x2, float y2) {
+	float notC = ((x1-x2) * (x1-x2)) + ((y1-y2) * (y1-y2));
+	float c = sqrt(notC);
+
+	return c;
 }
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "Kinect" };
