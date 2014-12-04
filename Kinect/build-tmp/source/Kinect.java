@@ -3,8 +3,8 @@ import processing.data.*;
 import processing.event.*; 
 import processing.opengl.*; 
 
-import processing.net.*; 
 import SimpleOpenNI.*; 
+import ipcapture.*; 
 
 import java.util.HashMap; 
 import java.util.ArrayList; 
@@ -17,11 +17,14 @@ import java.io.IOException;
 
 public class Kinect extends PApplet {
 
+//import processing.net.*;
 
 
+
+ipcapture.IPCapture cam;
 
 SimpleOpenNI kinect;
-Client client;
+//Client client;
 int[] userMapArr;
 float tolerence = 0.6f;
 int i = 0;
@@ -30,15 +33,21 @@ public void setup(){
 	frameRate(15);
 	size(640,480);
 
-	client = new Client(this,"172.30.40.34",3000);
+	//client to send to node server
+	//client = new Client(this,"172.30.40.34",3000);
+
+	//kinect
 	kinect = new SimpleOpenNI(this);
 	kinect.enableDepth();
 	kinect.enableUser();
 	kinect.setMirror(true);
+
 }
 
 public void draw(){
 	background(255);
+
+	//kinect image
 	kinect.update();
 	image(kinect.userImage(), 0, 0);
 
@@ -47,6 +56,12 @@ public void draw(){
 		if(kinect.isTrackingSkeleton(userList[i]))
 			drawSkelet(userList[i]);
 	}
+
+	//camera
+	if (cam.isAvailable()) {
+    	cam.read();
+    	image(cam,0,0);
+  	}
 }
 
 public void drawSkelet(int userId){
@@ -92,13 +107,13 @@ public void drawSkelet(int userId){
 	float cosA = teller / noemer;
 	float degree = degrees(acos(cosA));
 
-	if (projLeftHandPos.y < midY) {
+	if (projLeftHandPos.y > midY) {
 		degree = -degree;
 	}
 
 	if(i%10 == 0){
 		i = 0;
-		client.write(degree+"/");
+		//client.write(degree+"/");
 	}
 	i++;
 }

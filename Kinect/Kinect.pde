@@ -1,25 +1,36 @@
-import processing.net.*;
+//import processing.net.*;
 import SimpleOpenNI.*;
+import ipcapture.*;
+
+ipcapture.IPCapture cam;
 
 SimpleOpenNI kinect;
-Client client;
+//Client client;
 int[] userMapArr;
 float tolerence = 0.6;
 int i = 0;
 
 void setup(){
-	frameRate(15);
 	size(640,480);
+	
+	//client to send to node server
+	//client = new Client(this,"172.30.40.34",3000);
 
-	client = new Client(this,"172.30.40.34",3000);
+	//kinect
 	kinect = new SimpleOpenNI(this);
 	kinect.enableDepth();
 	kinect.enableUser();
 	kinect.setMirror(true);
+
+	//cam
+	cam = new ipcapture.IPCapture(this, "http://192.168.1.69:8081/stream.mjpg", "", "");
+  	cam.start();
 }
 
 void draw(){
 	background(255);
+
+	//kinect image
 	kinect.update();
 	image(kinect.userImage(), 0, 0);
 
@@ -28,6 +39,14 @@ void draw(){
 		if(kinect.isTrackingSkeleton(userList[i]))
 			drawSkelet(userList[i]);
 	}
+
+	//camera
+	/*if (cam.isAvailable()) {
+    	cam.read();
+    	image(cam,0,0);
+  	}*/
+  	image(cam,0,0);
+
 }
 
 void drawSkelet(int userId){
@@ -79,7 +98,7 @@ void drawSkelet(int userId){
 
 	if(i%10 == 0){
 		i = 0;
-		client.write(degree+"/");
+		//client.write(degree+"/");
 	}
 	i++;
 }
