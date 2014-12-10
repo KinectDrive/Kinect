@@ -11,6 +11,7 @@ float tolerence = 0.6;
 int i = 0;
 
 void setup(){
+        frameRate(15);
 	size(640,480);
 	
 	//client to send to node server
@@ -41,12 +42,10 @@ void draw(){
 	}
 
 	//camera
-	/*if (cam.isAvailable()) {
+	if (cam.isAvailable()) {
     	cam.read();
     	image(cam,0,0);
-  	}*/
-  	image(cam,0,0);
-
+  	}
 }
 
 void drawSkelet(int userId){
