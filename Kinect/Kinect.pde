@@ -9,13 +9,15 @@ Client client;
 int[] userMapArr;
 float tolerence = 0.6;
 int i = 0;
+float degree = 0;
 
 void setup(){
         frameRate(25);
-	size(640,480);
+	size(1207,723);
+        imageMode(CENTER);
 	
 	//client to send to node server
-	client = new Client(this,"192.168.1.103",3000);
+	client = new Client(this,"192.168.1.69",3000);
 
 	//kinect
 	kinect = new SimpleOpenNI(this);
@@ -24,15 +26,15 @@ void setup(){
 	kinect.setMirror(true);
 
 	//cam
-	cam = new ipcapture.IPCapture(this, "http://192.168.1.103:8081/stream.mjpg", "", "");
+	cam = new ipcapture.IPCapture(this, "http://192.168.1.69:8081/stream.mjpg", "", "");
   	cam.start();
 }
 
 void draw(){
 	//kinect image
 	kinect.update();
-	image(kinect.userImage(), 0, 0);
-
+	image(kinect.userImage(), 605,455,150,150);
+        
 	int[] userList = kinect.getUsers();
 	for (int i = 0; i < userList.length; ++i) {
 		if(kinect.isTrackingSkeleton(userList[i]))
@@ -42,8 +44,15 @@ void draw(){
 	//camera
 	if (cam.isAvailable()) {
     	cam.read();
-    	image(cam,0,0);
+    	image(cam,0,0,2412,480);
   	}
+  
+        image(loadImage("dash.png"), 0 + 1207/2, 100 + 723/2);
+        //image(loadImage("steer.png"),13 + 439/2,210 + 445/2);
+        translate(13 + 439/2, 210 + 445/2);
+        rotate(radians(degree));
+        translate(-(13+439/2),-(210+445/2));
+        image(loadImage("steer.png"),13 + 439/2,210 + 445/2);
 }
 
 void drawSkelet(int userId){
@@ -87,7 +96,7 @@ void drawSkelet(int userId){
 	float noemer = 2 * b * c;
 
 	float cosA = teller / noemer;
-	float degree = degrees(acos(cosA));
+	degree = degrees(acos(cosA));
 
 	if (projLeftHandPos.y > midY) {
 		degree = -degree;
